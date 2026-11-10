@@ -11,7 +11,7 @@ main{max-width:560px;margin:0 auto;padding:0 16px}
 h1{font-size:30px;margin:18px 0 2px;letter-spacing:-.5px}.sub{color:var(--t2);margin:0 0 14px}
 .top{display:flex;justify-content:space-between;align-items:flex-start}
 button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
-.ic{width:40px;height:40px;border-radius:20px;background:var(--sf);margin-top:18px;font-size:20px}
+.refresh{margin-top:18px;padding:10px 14px;border-radius:14px;background:var(--sf);font-size:14px;font-weight:600;white-space:nowrap}.refresh:disabled{opacity:.55}
 .days{display:flex;gap:6px;margin-bottom:14px}
 .d{flex:1;background:var(--sf);border-radius:14px;padding:8px 0;text-align:center;font-size:12px;color:var(--t2);transition:.15s}
 .d b{display:block;font-size:17px;color:var(--tx)}.d.on{background:var(--ac);color:#fff}.d.on b{color:#fff}.d.td{outline:2px solid var(--ac);outline-offset:-2px}
@@ -34,12 +34,11 @@ input,select{width:100%;font:inherit;padding:10px;border-radius:12px;border:0;ba
 pre{white-space:pre-wrap;font-size:12px;background:var(--sf);padding:10px;border-radius:12px;max-height:200px;overflow:auto}
 #st{color:var(--t2);font-size:14px;margin-top:10px}
 </style></head><body><main>
-<div class="top"><div><h1 id="h"></h1><p class="sub" id="s"></p></div><button class="ic" id="gear" aria-label="Настройки">⚙</button></div>
+<div class="top"><div><h1 id="h"></h1><p class="sub" id="s"></p></div><button class="refresh" id="refresh">↻ Обновить</button></div>
 <div class="days" id="days"></div>
 <div class="nav"><button id="pw">‹ Неделя</button><span id="wk" class="sub" style="margin:0"></span><button id="nw">Неделя ›</button></div>
 <div id="list"></div></main>
 
-<dialog id="dg"></dialog>
 
 
 <script>
@@ -54,13 +53,26 @@ t13:[['8:00','9:20'],['9:30','10:50'],['11:50','13:10'],['14:10','15:20'],['15:3
 t24:[['8:00','9:30'],['9:40','11:10'],['11:40','13:00'],['14:20','15:40'],['15:50','17:00'],['17:30','18:40']]};
 const DN=['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'],DS=['Пн','Вт','Ср','Чт','Пт','Сб'];
 const $=i=>document.getElementById(i),ld=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},sv=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
-let cfg=ld('cfg',{anchor:null}),chg=[],cur=new Date();cur.setHours(0,0,0,0);
+let chg=[],cur=new Date();cur.setHours(0,0,0,0);
 const normalizeLessons=items=>items.map(x=>({...x,date:String(x.date).replace(/^(\d{4})(\d{2})(\d{2})$/,'$1-$2-$3')}));
+const SUBJECT_SHORT={
+ 'Электроника и схемотехника':'ЭлСхем',
+ 'Эксплуатация компьютерных сетей':'ЭксКС',
+ 'Безопасность жизнедеятельности':'БЖД',
+ 'Разработка и эксплуатация автоматизированных систем':'РЭАС',
+ 'Основы философии':'Философ',
+ 'Физическая культура':'Физ-ра',
+ 'Иностранный язык в профессиональной деятельности':'ИнЯзПД'
+};
+const shortSubject=s=>SUBJECT_SHORT[s]||s;
+const shortTeacher=s=>{
+ const parts=String(s||'').trim().split(/\s+/);
+ return parts.length>=3 ? parts[0][0]+'.'+parts[1][0]+'. '+parts.slice(2).join(' ') : (s||'');
+};
 let scheduleData=ld('remoteSchedule',null),remoteLessons=normalizeLessons(scheduleData?.lessons||[]);
 const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 const mon=d=>{const x=new Date(d);x.setDate(x.getDate()-((x.getDay()+6)%7));x.setHours(0,0,0,0);return x};
 const addD=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x};
-function weekOf(d){if(!cfg.anchor)return 1;const a=cfg.anchor,n=Math.round((mon(d)-mon(new Date(a.mon)))/6048e5);return(((a.w-1+n)%2)+2)%2+1}
 function bells(d){if(d.getDay()!==4)return BELL.n;const k=Math.ceil(d.getDate()/7);return k===1||k===3?BELL.t13:k===2||k===4?BELL.t24:BELL.n}
 const tag=s=>(s||'').match(/([12])\s*пг/i)?.[1]|0,clean=s=>(s||'').replace(/\+?\s*[12]\s*пг/i,'').replace(/\+$/,'').trim();
 function resolve(d){
@@ -93,6 +105,7 @@ function resolve(d){
    l.s=l.s||times[0];l.e=l.e||times[1];
   }
  });
+ out.forEach(l=>{l.subj=shortSubject(l.subj);l.teacher=shortTeacher(l.teacher)});
  return out.sort((a,b)=>a.pair-b.pair||a.position-b.position);
 }
 
@@ -105,6 +118,7 @@ async function loadSchedule(){
   scheduleData=data;remoteLessons=normalizeLessons(data.lessons);
   sv('remoteSchedule',data);
   render();
+  return true;
  }catch(error){
   console.warn('Не удалось обновить расписание:',error);
   if(!scheduleData){
@@ -112,10 +126,11 @@ async function loadSchedule(){
    remoteLessons=normalizeLessons(scheduleData?.lessons||[]);
   }
   render();
+  return false;
  }
 }
 const mm=t=>{const[a,b]=t.split(':');return+a*60+ +b};
-function render(){const d=cur,t=new Date();t.setHours(0,0,0,0);const L=resolve(d),w=weekOf(d);
+function render(){const d=cur,t=new Date();t.setHours(0,0,0,0);const L=resolve(d);
  $('h').textContent=DN[d.getDay()];$('s').textContent=d.toLocaleDateString('ru',{day:'numeric',month:'long'})+(d.getDay()===4?' · '+(bells(d)===BELL.t13?'классный час':bells(d)===BELL.t24?'метод. час':''):'');
  $('wk').textContent='Дневник'+(scheduleData?.updated_at?' · '+new Date(scheduleData.updated_at).toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'}):'');
  const m=mon(d);$('days').innerHTML=DS.map((n,i)=>{const x=addD(m,i);return`<button class="d ${iso(x)===iso(d)?'on':''} ${iso(x)===iso(t)?'td':''}" data-d="${iso(x)}">${n}<b>${x.getDate()}</b></button>`}).join('');
@@ -126,10 +141,7 @@ function render(){const d=cur,t=new Date();t.setHours(0,0,0,0);const L=resolve(d
   return`<div class="card ${l.st==='cancel'?'cancel':l.st==='changed'?'changed':'normal'}"><div class="tm">${l.s}<small>${l.e}</small></div><div><div class="nm">${l.subj}</div><div class="mt">${l.pair} пара${l.room?' · каб. '+l.room:''}${l.teacher?' · '+l.teacher:''}</div>${bd?`<span class="badge b-${l.st}">${bd}</span>`:''}${now?'<span class="badge b-now">Идёт сейчас</span>':''}</div></div>`}).join(''):`<div class="empty">${hasDate?(d.getDay()?'В этот день занятий нет.':'Воскресенье — выходной.'):'На эту дату нет данных из Дневника.'}<br>Проверьте расписание Дневник.ру позже.</div>`}
 $('days').onclick=e=>{const b=e.target.closest('[data-d]');if(b){cur=new Date(b.dataset.d+'T00:00');render()}};
 $('pw').onclick=()=>{cur=addD(cur,-7);render()};$('nw').onclick=()=>{cur=addD(cur,7);render()};
-const dg=$('dg');
-$('gear').onclick=()=>{const t=new Date();dg.innerHTML=`<h2 style="margin:0">Настройки</h2><p class="sub">Источник: Дневник.ру · группа БП314</p><label>Сегодня идёт неделя №</label><select id="aw"><option>1</option><option>2</option></select><button class="pri" id="ok">Сохранить</button>`;
- $('aw').value=weekOf(t);$('ok').onclick=()=>{cfg={anchor:{mon:iso(mon(t)),w:+$('aw').value}};sv('cfg',cfg);dg.close();render()};dg.showModal()};
-if(!cfg.anchor)$('gear').click();
+$('refresh').onclick=async()=>{const b=$('refresh');b.disabled=true;b.textContent='Обновляю…';const ok=await loadSchedule();b.disabled=false;b.textContent=ok?'↻ Обновить':'Повторить';};
 render();loadSchedule();setInterval(render,60000);setInterval(loadSchedule,5*60*1000);
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js');
 </script></body></html>
