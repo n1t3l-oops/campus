@@ -78,11 +78,42 @@ async def get_week_start(page):
 async def get_week_urls(page):
     current_url = page.url
     week_start = await get_week_start(page)
-    return [
-        make_week_url(current_url, week_start - timedelta(days=7)),
-        current_url,
-        make_week_url(current_url, week_start + timedelta(days=7)),
+
+    links = await page.locator(
+        "a[href*='period='][href*='year='][href*='month='][href*='day=']"
+    ).evaluate_all("els => els.map(a => a.href)")
+
+    dated_links = {}
+    for url in links:
+        query = parse_qs(urlparse(url).query)
+        try:
+            day = date(
+                int(query["year"][0]),
+                int(query["month"][0]),
+                int(query["day"][0]),
+            )
+        except (KeyError, ValueError, TypeError):
+            continue
+        dated_links[day] = url
+
+    previous = [
+        (day, url) for day, url in dated_links.items()
+        if 0 < (week_start - day).days <= 9
     ]
+    following = [
+        (day, url) for day, url in dated_links.items()
+        if 0 < (day - week_start).days <= 9
+    ]
+
+    if not previous or not following:
+        raise RuntimeError(
+            "Не удалось найти ссылки на предыдущую и следующую недели "
+            "в навигации Дневник.ру."
+        )
+
+    previous_url = max(previous, key=lambda item: item[0])[1]
+    next_url = min(following, key=lambda item: item[0])[1]
+    return [previous_url, current_url, next_url]
 
 
 async def extract_page(page):
