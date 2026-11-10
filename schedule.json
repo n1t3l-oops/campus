@@ -1,0 +1,195 @@
+{
+  "updated_at": "2026-11-11T01:33:36",
+  "source": "https://schools.dnevnik.ru/v2/r/omsk/schedules/view?school=53237&group=2509016193679422543",
+  "lessons": [
+    {
+      "date": "20261110",
+      "lesson": "3",
+      "position": 1,
+      "classes": "dL dLO",
+      "text": "ЭлСхем\n\nБерезовский Д.В...\n\n11:30 - 13:00\n\n214"
+    },
+    {
+      "date": "20261109",
+      "lesson": "4",
+      "position": 1,
+      "classes": "dL ",
+      "text": "ЭксКС\n\nЗинченко А.К.\n\n13:40 - 15:10\n\n118"
+    },
+    {
+      "date": "20261109",
+      "lesson": "4",
+      "position": 2,
+      "classes": "dL ",
+      "text": "ЭксКС\n\nАдринский И.Г.\n\n13:40 - 15:10\n\n118"
+    },
+    {
+      "date": "20261110",
+      "lesson": "4",
+      "position": 1,
+      "classes": "dL ",
+      "text": "РЭАС\n\nШефер А.В.\n\n13:40 - 15:10\n\n312"
+    },
+    {
+      "date": "20261110",
+      "lesson": "4",
+      "position": 2,
+      "classes": "dL ",
+      "text": "РЭАС\n\nПодшивалова Д.А...\n\n13:40 - 15:10\n\n312"
+    },
+    {
+      "date": "20261111",
+      "lesson": "4",
+      "position": 1,
+      "classes": "dL ",
+      "text": "ЭксКС\n\nАдринский И.Г.\n\n13:40 - 15:10\n\n116"
+    },
+    {
+      "date": "20261112",
+      "lesson": "4",
+      "position": 1,
+      "classes": "dL ",
+      "text": "РЭАС\n\nШефер А.В.\n\n13:40 - 15:10\n\n312"
+    },
+    {
+      "date": "20261112",
+      "lesson": "4",
+      "position": 2,
+      "classes": "dL ",
+      "text": "РЭАС\n\nПодшивалова Д.А...\n\n13:40 - 15:10\n\n312"
+    },
+    {
+      "date": "20261113",
+      "lesson": "4",
+      "position": 1,
+      "classes": "dL ",
+      "text": "РЭАС\n\nШефер А.В.\n\n13:40 - 15:10\n\n312"
+    },
+    {
+      "date": "20261113",
+      "lesson": "4",
+      "position": 2,
+      "classes": "dL ",
+      "text": "РЭАС\n\nПодшивалова Д.А...\n\n13:40 - 15:10\n\n312"
+    },
+    {
+      "date": "20261114",
+      "lesson": "4",
+      "position": 1,
+      "classes": "dL ",
+      "text": "ЭксКС\n\nАдринский И.Г.\n\n13:40 - 15:10\n\n118"
+    },
+    {
+      "date": "20261114",
+      "lesson": "4",
+      "position": 2,
+      "classes": "dL ",
+      "text": "ЭксКС\n\nЗинченко А.К.\n\n13:40 - 15:10\n\n118"
+    },
+    {
+      "date": "20261109",
+      "lesson": "5",
+      "position": 1,
+      "classes": "dL ",
+      "text": "ЭлСхем\n\nБерезовский Д.В...\n\n15:20 - 16:50\n\n214"
+    },
+    {
+      "date": "20261110",
+      "lesson": "5",
+      "position": 1,
+      "classes": "dL dLO",
+      "text": "ОсФилос\n\nЕфимов В.С.\n\n15:20 - 16:50\n\n323"
+    },
+    {
+      "date": "20261110",
+      "lesson": "5",
+      "position": 2,
+      "classes": "dL dLC",
+      "text": "ЭлСхем\n\nБерезовский Д.В...\n\n15:20 - 16:50\n\n214"
+    },
+    {
+      "date": "20261111",
+      "lesson": "5",
+      "position": 1,
+      "classes": "dL ",
+      "text": "ЭлСхем\n\nБерезовский Д.В...\n\n15:20 - 16:50\n\n214"
+    },
+    {
+      "date": "20261112",
+      "lesson": "5",
+      "position": 1,
+      "classes": "dL ",
+      "text": "РЭАС\n\nШефер А.В.\n\n15:20 - 16:50\n\n312"
+    },
+    {
+      "date": "20261113",
+      "lesson": "5",
+      "position": 1,
+      "classes": "dL ",
+      "text": "Физ-ра\n\nУрванцев А.Е.\n\n15:20 - 16:50\n\n401"
+    },
+    {
+      "date": "20261114",
+      "lesson": "5",
+      "position": 1,
+      "classes": "dL ",
+      "text": "ЭксКС\n\nАдринский И.Г.\n\n15:20 - 16:50\n\n312"
+    },
+    {
+      "date": "20261109",
+      "lesson": "6",
+      "position": 1,
+      "classes": "dL ",
+      "text": "БЖД\n\nИжойкин Ю.М.\n\n17:10 - 18:40\n\n504"
+    },
+    {
+      "date": "20261110",
+      "lesson": "6",
+      "position": 1,
+      "classes": "dL dLC",
+      "text": "ОсФилос\n\nЕфимов В.С.\n\n17:10 - 18:40\n\n323"
+    },
+    {
+      "date": "20261111",
+      "lesson": "6",
+      "position": 1,
+      "classes": "dL ",
+      "text": "РЭАС\n\nШефер А.В.\n\n17:10 - 18:40\n\n312"
+    },
+    {
+      "date": "20261112",
+      "lesson": "6",
+      "position": 1,
+      "classes": "dL ",
+      "text": "ОсФилос\n\nЕфимов В.С.\n\n17:10 - 18:40\n\n323"
+    },
+    {
+      "date": "20261113",
+      "lesson": "6",
+      "position": 1,
+      "classes": "dL ",
+      "text": "ЭксКС\n\nАдринский И.Г.\n\n17:10 - 18:40\n\n118"
+    },
+    {
+      "date": "20261113",
+      "lesson": "6",
+      "position": 2,
+      "classes": "dL ",
+      "text": "ЭксКС\n\nЗинченко А.К.\n\n17:10 - 18:40\n\n118"
+    },
+    {
+      "date": "20261114",
+      "lesson": "6",
+      "position": 1,
+      "classes": "dL ",
+      "text": "ИнЯзПД\n\nПередрей А.Е.\n\n17:10 - 18:40\n\n204"
+    },
+    {
+      "date": "20261114",
+      "lesson": "6",
+      "position": 2,
+      "classes": "dL ",
+      "text": "ИнЯзПД\n\nАнтонова О.Н.\n\n17:10 - 18:40\n\n403"
+    }
+  ]
+}
