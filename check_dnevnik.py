@@ -120,16 +120,25 @@ async def extract_page(page):
             const status = statusClass === 'dLC' ? 'cancelled'
                 : statusClass === 'dLO' ? 'changed' : 'normal';
             const siblings = td ? [...td.querySelectorAll(':scope > .dL')] : [];
+            const subjectText = subject?.title || subject?.innerText?.trim() || 'Занятие';
+            const teacherText = (teacher?.title || teacher?.innerText || '').replace(/^Учитель:\\s*/, '').trim();
+            let subgroup = siblings.length > 1 ? siblings.indexOf(el) + 1 : 0;
+            // В английском преподаватели в DOM идут в обратном порядке относительно
+            // принятого распределения подгрупп: Антонова — 1, Передрей — 2.
+            if (subjectText.includes('Иностранный язык в профессиональной деятельности')) {
+                if (teacherText.includes('Антонова')) subgroup = 1;
+                else if (teacherText.includes('Передрей')) subgroup = 2;
+            }
             return {
                 id: (el.id || '').replace(/^l/, ''),
                 date: cell ? cell[1] : '',
                 pair: cell ? Number(cell[2]) : 0,
                 position: siblings.indexOf(el) + 1,
-                subgroup: siblings.length > 1 ? siblings.indexOf(el) + 1 : 0,
+                subgroup,
                 status,
                 status_class: statusClass,
-                subject: subject?.title || subject?.innerText?.trim() || 'Занятие',
-                teacher: (teacher?.title || teacher?.innerText || '').replace(/^Учитель:\\s*/, '').trim(),
+                subject: subjectText,
+                teacher: teacherText,
                 room: (room?.title || room?.innerText || '').replace(/^Место проведения:\\s*/, '').trim(),
                 start: tm ? tm[1] : '',
                 end: tm ? tm[2] : ''
@@ -150,6 +159,13 @@ async def scrape():
             page = context.pages[0] if context.pages else await context.new_page()
             await page.goto(BASE_URL, wait_until="domcontentloaded", timeout=90000)
             await page.locator("table.scheduleWeekEditorParent").wait_for(timeout=90000)
+
+            previous_data = {}
+            if DATA_FILE.exists():
+                try:
+                    previous_data = json.loads(DATA_FILE.read_text(encoding="utf-8"))
+                except (json.JSONDecodeError, OSError):
+                    logging.warning("Не удалось прочитать предыдущий schedule.json для сравнения.")
 
             week_urls = await get_week_urls(page)
             current_first_lesson = await get_week_start(page)
@@ -197,6 +213,21 @@ async def scrape():
                     index + 1,
                     len(lessons),
                 )
+
+            previous_by_id = {
+                str(item.get("id")): item
+                for item in previous_data.get("lessons", [])
+                if item.get("id")
+            }
+            compare_fields = ("subject", "teacher", "room", "start", "end", "pair")
+            for lesson in all_lessons.values():
+                old = previous_by_id.get(str(lesson["id"]))
+                if old:
+                    changed = any(old.get(field) != lesson.get(field) for field in compare_fields)
+                    if changed:
+                        lesson["previous"] = {field: old.get(field, "") for field in compare_fields}
+                    elif old.get("previous"):
+                        lesson["previous"] = old["previous"]
 
             result = {
                 "source": "Dnevnik.ru",
