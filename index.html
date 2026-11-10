@@ -34,10 +34,11 @@ input,select{width:100%;font:inherit;padding:10px;border-radius:12px;border:0;ba
 pre{white-space:pre-wrap;font-size:12px;background:var(--sf);padding:10px;border-radius:12px;max-height:200px;overflow:auto}
 #st{color:var(--t2);font-size:14px;margin-top:10px}
 </style></head><body><main>
-<div class="top"><div><h1 id="h"></h1><p class="sub" id="s"></p></div><button class="refresh" id="refresh">↻ Обновить</button></div>
+<div class="top"><div><h1 id="h"></h1><p class="sub" id="s"></p></div><div style="display:flex;gap:8px"><button class="refresh" id="gear" aria-label="Настройки">⚙</button><button class="refresh" id="refresh">↻ Обновить</button></div></div>
 <div class="days" id="days"></div>
 <div class="nav"><button id="pw">‹ Неделя</button><span id="wk" class="sub" style="margin:0"></span><button id="nw">Неделя ›</button></div>
 <div id="list"></div></main>
+<dialog id="dg"></dialog>
 
 
 
@@ -53,7 +54,7 @@ t13:[['8:00','9:20'],['9:30','10:50'],['11:50','13:10'],['14:10','15:20'],['15:3
 t24:[['8:00','9:30'],['9:40','11:10'],['11:40','13:00'],['14:20','15:40'],['15:50','17:00'],['17:30','18:40']]};
 const DN=['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'],DS=['Пн','Вт','Ср','Чт','Пт','Сб'];
 const $=i=>document.getElementById(i),ld=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},sv=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
-let chg=[],cur=new Date();cur.setHours(0,0,0,0);
+let cfg=ld('cfg',{subgroup:'all'}),chg=[],cur=new Date();cur.setHours(0,0,0,0);
 const normalizeLessons=items=>items.map(x=>({...x,date:String(x.date).replace(/^(\d{4})(\d{2})(\d{2})$/,'$1-$2-$3')}));
 const SUBJECT_SHORT={
  'Электроника и схемотехника':'ЭлСхем',
@@ -105,8 +106,10 @@ function resolve(d){
    l.s=l.s||times[0];l.e=l.e||times[1];
   }
  });
- out.forEach(l=>{l.subj=shortSubject(l.subj);l.teacher=shortTeacher(l.teacher)});
- return out.sort((a,b)=>a.pair-b.pair||a.position-b.position);
+ const counts={};out.forEach(l=>counts[l.pair]=(counts[l.pair]||0)+1);
+ out.forEach(l=>{l.subgroup=Number(l.subgroup)||(counts[l.pair]>1?l.position:0);l.subj=shortSubject(l.subj);l.teacher=shortTeacher(l.teacher)});
+ const selected=cfg.subgroup||'all';
+ return out.filter(l=>selected==='all'||!l.subgroup||String(l.subgroup)===selected).sort((a,b)=>a.pair-b.pair||a.position-b.position);
 }
 
 async function loadSchedule(){
@@ -141,6 +144,13 @@ function render(){const d=cur,t=new Date();t.setHours(0,0,0,0);const L=resolve(d
   return`<div class="card ${l.st==='cancel'?'cancel':l.st==='changed'?'changed':'normal'}"><div class="tm">${l.s}<small>${l.e}</small></div><div><div class="nm">${l.subj}</div><div class="mt">${l.pair} пара${l.room?' · каб. '+l.room:''}${l.teacher?' · '+l.teacher:''}</div>${bd?`<span class="badge b-${l.st}">${bd}</span>`:''}${now?'<span class="badge b-now">Идёт сейчас</span>':''}</div></div>`}).join(''):`<div class="empty">${hasDate?(d.getDay()?'В этот день занятий нет.':'Воскресенье — выходной.'):'На эту дату нет данных из Дневника.'}<br>Проверьте расписание Дневник.ру позже.</div>`}
 $('days').onclick=e=>{const b=e.target.closest('[data-d]');if(b){cur=new Date(b.dataset.d+'T00:00');render()}};
 $('pw').onclick=()=>{cur=addD(cur,-7);render()};$('nw').onclick=()=>{cur=addD(cur,7);render()};
+const dg=$('dg');
+$('gear').onclick=()=>{
+ dg.innerHTML=`<h2 style="margin:0">Настройки</h2><p class="sub">Источник: Дневник.ру · группа БП314</p><label>Подгруппа</label><select id="sg"><option value="all">Обе подгруппы</option><option value="1">1 подгруппа</option><option value="2">2 подгруппа</option></select><button class="pri" id="ok">Сохранить</button>`;
+ $('sg').value=cfg.subgroup||'all';
+ $('ok').onclick=()=>{cfg={subgroup:$('sg').value};sv('cfg',cfg);dg.close();render()};
+ dg.showModal();
+};
 $('refresh').onclick=async()=>{const b=$('refresh');b.disabled=true;b.textContent='Обновляю…';const ok=await loadSchedule();b.disabled=false;b.textContent=ok?'↻ Обновить':'Повторить';};
 render();loadSchedule();setInterval(render,60000);setInterval(loadSchedule,5*60*1000);
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js');
