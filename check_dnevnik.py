@@ -105,6 +105,7 @@ async def extract_page(page):
                 date: cell ? cell[1] : '',
                 pair: cell ? Number(cell[2]) : 0,
                 position: siblings.indexOf(el) + 1,
+                subgroup: siblings.length > 1 ? siblings.indexOf(el) + 1 : 0,
                 status,
                 status_class: statusClass,
                 subject: subject?.title || subject?.innerText?.trim() || 'Занятие',
@@ -131,6 +132,7 @@ async def scrape():
             await page.locator("table.scheduleWeekEditorParent").wait_for(timeout=90000)
 
             week_urls = await get_week_urls(page)
+            current_week_start = await get_week_start(page)
             all_lessons = {}
 
             for index, url in enumerate(week_urls):
@@ -138,6 +140,13 @@ async def scrape():
                     await page.goto(url, wait_until="domcontentloaded", timeout=90000)
                     await page.locator("table.scheduleWeekEditorParent").wait_for(timeout=90000)
 
+                expected_start = current_week_start + timedelta(days=(index - 1) * 7)
+                actual_start = await get_week_start(page)
+                if actual_start != expected_start:
+                    raise RuntimeError(
+                        f"Дневник.ру открыл не ту неделю: ожидалась {expected_start}, "
+                        f"получена {actual_start}. Расписание не опубликовано."
+                    )
                 lessons = await extract_page(page)
                 for lesson in lessons:
                     if not lesson["id"] or not lesson["date"] or not lesson["pair"]:
