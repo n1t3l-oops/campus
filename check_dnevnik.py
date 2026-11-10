@@ -186,9 +186,18 @@ async def scrape():
 
                 actual_start = await get_week_start(page)
                 if actual_start != expected_start:
+                    table_dates = await page.locator(
+                        "table.scheduleWeekEditorParent td[id^='d']"
+                    ).evaluate_all(
+                        """els => [...new Set(els.map(el => {
+                            const m = (el.id || '').match(/^d(\\d{8})_\\d+$/);
+                            return m ? m[1] : null;
+                        }).filter(Boolean))].sort()"""
+                    )
                     raise RuntimeError(
                         f"Дневник.ру открыл не ту неделю: ожидалась {expected_start}, "
-                        f"получена {actual_start}. Расписание не опубликовано."
+                        f"получена {actual_start}. URL после перехода: {page.url}. "
+                        f"Даты в таблице: {table_dates}. Расписание не опубликовано."
                     )
                 lessons = await extract_page(page)
                 for lesson in lessons:
