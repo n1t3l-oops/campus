@@ -65,15 +65,15 @@ const tag=s=>(s||'').match(/([12])\s*пг/i)?.[1]|0,clean=s=>(s||'').replace(/\+
 function resolve(d){
  const date=iso(d);
  const out=remoteLessons.filter(x=>x.date===date).map(x=>{
-  const lines=String(x.text||'').split(/\\r?\\n/).map(s=>s.trim()).filter(Boolean);
-  const ti=lines.findIndex(s=>/\\d{1,2}:\\d{2}\\s*-\\s*\\d{1,2}:\\d{2}/.test(s));
-  const time=ti>=0?lines[ti].match(/(\\d{1,2}:\\d{2})\\s*-\\s*(\\d{1,2}:\\d{2})/):null;
+  const lines=String(x.text||'').split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
+  const ti=lines.findIndex(s=>/\d{1,2}:\d{2}\s*-\s*\d{1,2}:\d{2}/.test(s));
+  const time=ti>=0?lines[ti].match(/(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})/):null;
   return {
    pair:Number(x.lesson),
    position:Number(x.position)||1,
    subj:lines[0]||'Занятие',
    teacher:ti>1?lines[1]:'',
-   room:ti>=0?(lines.slice(ti+1).find(s=>/^[0-9]{2,3}[а-яa-z]?\\+?$/i.test(s))||''):'',
+   room:ti>=0?(lines.slice(ti+1).find(s=>/^[0-9]{2,3}[а-яa-z]?\+?$/i.test(s))||''):'',
    s:time?time[1]:'',
    e:time?time[2]:'',
    st:null
