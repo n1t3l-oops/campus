@@ -55,7 +55,7 @@ t24:[['8:00','9:30'],['9:40','11:10'],['11:40','13:00'],['14:20','15:40'],['15:5
 const DN=['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'],DS=['Пн','Вт','Ср','Чт','Пт','Сб'];
 const $=i=>document.getElementById(i),ld=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},sv=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
 let cfg=ld('cfg',{sub:2,group:'БП314',anchor:null}),chg=ld('chg',[]),cur=new Date();cur.setHours(0,0,0,0);
-const normalizeLessons=items=>items.map(x=>({...x,date:String(x.date).replace(/^(\\d{4})(\\d{2})(\\d{2})$/,'$1-$2-$3')}));
+const normalizeLessons=items=>items.map(x=>({...x,date:String(x.date).replace(/^(\d{4})(\d{2})(\d{2})$/,'$1-$2-$3')}));
 let scheduleData=ld('remoteSchedule',null),remoteLessons=normalizeLessons(scheduleData?.lessons||[]);
 const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 const mon=d=>{const x=new Date(d);x.setDate(x.getDate()-((x.getDay()+6)%7));x.setHours(0,0,0,0);return x};
