@@ -175,17 +175,9 @@ async def scrape():
                 await page.goto(url, wait_until="domcontentloaded", timeout=90000)
                 await page.locator("table.scheduleWeekEditorParent").wait_for(timeout=90000)
                 expected_key = expected_start.strftime("%Y%m%d")
-                await page.wait_for_function(
-                    """expected => {
-                        const ids = [...document.querySelectorAll(
-                            'table.scheduleWeekEditorParent td[id^="d"]'
-                        )].map(td => (td.id || '').match(/^d(\\d{8})_\\d+$/))
-                          .filter(Boolean).map(match => match[1]);
-                        return ids.length > 0 && ids.includes(expected);
-                    }""",
-                    arg=expected_key,
-                    timeout=30000,
-                )
+                await page.locator(
+                    f"table.scheduleWeekEditorParent td[id^='d{expected_key}_']"
+                ).first.wait_for(state="attached", timeout=30000)
 
                 actual_start = await get_week_start(page)
                 if actual_start != expected_start:
