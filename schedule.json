@@ -1,195 +1,332 @@
 {
+  "source": "Dnevnik.ru",
+  "group": "БП314",
   "updated_at": "2026-11-11T01:33:36",
-  "source": "https://schools.dnevnik.ru/v2/r/omsk/schedules/view?school=53237&group=2509016193679422543",
+  "weeks": [],
   "lessons": [
     {
+      "id": "legacy-20261110-3-1",
       "date": "20261110",
-      "lesson": "3",
+      "pair": 3,
       "position": 1,
-      "classes": "dL dLO",
-      "text": "ЭлСхем\n\nБерезовский Д.В...\n\n11:30 - 13:00\n\n214"
+      "status": "changed",
+      "subject": "ЭлСхем",
+      "teacher": "Березовский Д.В...",
+      "room": "214",
+      "start": "11:30",
+      "end": "13:00"
     },
     {
+      "id": "legacy-20261109-4-1",
       "date": "20261109",
-      "lesson": "4",
+      "pair": 4,
       "position": 1,
-      "classes": "dL ",
-      "text": "ЭксКС\n\nЗинченко А.К.\n\n13:40 - 15:10\n\n118"
+      "status": "normal",
+      "subject": "ЭксКС",
+      "teacher": "Зинченко А.К.",
+      "room": "118",
+      "start": "13:40",
+      "end": "15:10"
     },
     {
+      "id": "legacy-20261109-4-2",
       "date": "20261109",
-      "lesson": "4",
+      "pair": 4,
       "position": 2,
-      "classes": "dL ",
-      "text": "ЭксКС\n\nАдринский И.Г.\n\n13:40 - 15:10\n\n118"
+      "status": "normal",
+      "subject": "ЭксКС",
+      "teacher": "Адринский И.Г.",
+      "room": "118",
+      "start": "13:40",
+      "end": "15:10"
     },
     {
+      "id": "legacy-20261110-4-1",
       "date": "20261110",
-      "lesson": "4",
+      "pair": 4,
       "position": 1,
-      "classes": "dL ",
-      "text": "РЭАС\n\nШефер А.В.\n\n13:40 - 15:10\n\n312"
+      "status": "normal",
+      "subject": "РЭАС",
+      "teacher": "Шефер А.В.",
+      "room": "312",
+      "start": "13:40",
+      "end": "15:10"
     },
     {
+      "id": "legacy-20261110-4-2",
       "date": "20261110",
-      "lesson": "4",
+      "pair": 4,
       "position": 2,
-      "classes": "dL ",
-      "text": "РЭАС\n\nПодшивалова Д.А...\n\n13:40 - 15:10\n\n312"
+      "status": "normal",
+      "subject": "РЭАС",
+      "teacher": "Подшивалова Д.А...",
+      "room": "312",
+      "start": "13:40",
+      "end": "15:10"
     },
     {
+      "id": "legacy-20261111-4-1",
       "date": "20261111",
-      "lesson": "4",
+      "pair": 4,
       "position": 1,
-      "classes": "dL ",
-      "text": "ЭксКС\n\nАдринский И.Г.\n\n13:40 - 15:10\n\n116"
+      "status": "normal",
+      "subject": "ЭксКС",
+      "teacher": "Адринский И.Г.",
+      "room": "116",
+      "start": "13:40",
+      "end": "15:10"
     },
     {
+      "id": "legacy-20261112-4-1",
       "date": "20261112",
-      "lesson": "4",
+      "pair": 4,
       "position": 1,
-      "classes": "dL ",
-      "text": "РЭАС\n\nШефер А.В.\n\n13:40 - 15:10\n\n312"
+      "status": "normal",
+      "subject": "РЭАС",
+      "teacher": "Шефер А.В.",
+      "room": "312",
+      "start": "13:40",
+      "end": "15:10"
     },
     {
+      "id": "legacy-20261112-4-2",
       "date": "20261112",
-      "lesson": "4",
+      "pair": 4,
       "position": 2,
-      "classes": "dL ",
-      "text": "РЭАС\n\nПодшивалова Д.А...\n\n13:40 - 15:10\n\n312"
+      "status": "normal",
+      "subject": "РЭАС",
+      "teacher": "Подшивалова Д.А...",
+      "room": "312",
+      "start": "13:40",
+      "end": "15:10"
     },
     {
+      "id": "legacy-20261113-4-1",
       "date": "20261113",
-      "lesson": "4",
+      "pair": 4,
       "position": 1,
-      "classes": "dL ",
-      "text": "РЭАС\n\nШефер А.В.\n\n13:40 - 15:10\n\n312"
+      "status": "normal",
+      "subject": "РЭАС",
+      "teacher": "Шефер А.В.",
+      "room": "312",
+      "start": "13:40",
+      "end": "15:10"
     },
     {
+      "id": "legacy-20261113-4-2",
       "date": "20261113",
-      "lesson": "4",
+      "pair": 4,
       "position": 2,
-      "classes": "dL ",
-      "text": "РЭАС\n\nПодшивалова Д.А...\n\n13:40 - 15:10\n\n312"
+      "status": "normal",
+      "subject": "РЭАС",
+      "teacher": "Подшивалова Д.А...",
+      "room": "312",
+      "start": "13:40",
+      "end": "15:10"
     },
     {
+      "id": "legacy-20261114-4-1",
       "date": "20261114",
-      "lesson": "4",
+      "pair": 4,
       "position": 1,
-      "classes": "dL ",
-      "text": "ЭксКС\n\nАдринский И.Г.\n\n13:40 - 15:10\n\n118"
+      "status": "normal",
+      "subject": "ЭксКС",
+      "teacher": "Адринский И.Г.",
+      "room": "118",
+      "start": "13:40",
+      "end": "15:10"
     },
     {
+      "id": "legacy-20261114-4-2",
       "date": "20261114",
-      "lesson": "4",
+      "pair": 4,
       "position": 2,
-      "classes": "dL ",
-      "text": "ЭксКС\n\nЗинченко А.К.\n\n13:40 - 15:10\n\n118"
+      "status": "normal",
+      "subject": "ЭксКС",
+      "teacher": "Зинченко А.К.",
+      "room": "118",
+      "start": "13:40",
+      "end": "15:10"
     },
     {
+      "id": "legacy-20261109-5-1",
       "date": "20261109",
-      "lesson": "5",
+      "pair": 5,
       "position": 1,
-      "classes": "dL ",
-      "text": "ЭлСхем\n\nБерезовский Д.В...\n\n15:20 - 16:50\n\n214"
+      "status": "normal",
+      "subject": "ЭлСхем",
+      "teacher": "Березовский Д.В...",
+      "room": "214",
+      "start": "15:20",
+      "end": "16:50"
     },
     {
+      "id": "legacy-20261110-5-1",
       "date": "20261110",
-      "lesson": "5",
+      "pair": 5,
       "position": 1,
-      "classes": "dL dLO",
-      "text": "ОсФилос\n\nЕфимов В.С.\n\n15:20 - 16:50\n\n323"
+      "status": "changed",
+      "subject": "ОсФилос",
+      "teacher": "Ефимов В.С.",
+      "room": "323",
+      "start": "15:20",
+      "end": "16:50"
     },
     {
+      "id": "legacy-20261110-5-2",
       "date": "20261110",
-      "lesson": "5",
+      "pair": 5,
       "position": 2,
-      "classes": "dL dLC",
-      "text": "ЭлСхем\n\nБерезовский Д.В...\n\n15:20 - 16:50\n\n214"
+      "status": "cancelled",
+      "subject": "ЭлСхем",
+      "teacher": "Березовский Д.В...",
+      "room": "214",
+      "start": "15:20",
+      "end": "16:50"
     },
     {
+      "id": "legacy-20261111-5-1",
       "date": "20261111",
-      "lesson": "5",
+      "pair": 5,
       "position": 1,
-      "classes": "dL ",
-      "text": "ЭлСхем\n\nБерезовский Д.В...\n\n15:20 - 16:50\n\n214"
+      "status": "normal",
+      "subject": "ЭлСхем",
+      "teacher": "Березовский Д.В...",
+      "room": "214",
+      "start": "15:20",
+      "end": "16:50"
     },
     {
+      "id": "legacy-20261112-5-1",
       "date": "20261112",
-      "lesson": "5",
+      "pair": 5,
       "position": 1,
-      "classes": "dL ",
-      "text": "РЭАС\n\nШефер А.В.\n\n15:20 - 16:50\n\n312"
+      "status": "normal",
+      "subject": "РЭАС",
+      "teacher": "Шефер А.В.",
+      "room": "312",
+      "start": "15:20",
+      "end": "16:50"
     },
     {
+      "id": "legacy-20261113-5-1",
       "date": "20261113",
-      "lesson": "5",
+      "pair": 5,
       "position": 1,
-      "classes": "dL ",
-      "text": "Физ-ра\n\nУрванцев А.Е.\n\n15:20 - 16:50\n\n401"
+      "status": "normal",
+      "subject": "Физ-ра",
+      "teacher": "Урванцев А.Е.",
+      "room": "401",
+      "start": "15:20",
+      "end": "16:50"
     },
     {
+      "id": "legacy-20261114-5-1",
       "date": "20261114",
-      "lesson": "5",
+      "pair": 5,
       "position": 1,
-      "classes": "dL ",
-      "text": "ЭксКС\n\nАдринский И.Г.\n\n15:20 - 16:50\n\n312"
+      "status": "normal",
+      "subject": "ЭксКС",
+      "teacher": "Адринский И.Г.",
+      "room": "312",
+      "start": "15:20",
+      "end": "16:50"
     },
     {
+      "id": "legacy-20261109-6-1",
       "date": "20261109",
-      "lesson": "6",
+      "pair": 6,
       "position": 1,
-      "classes": "dL ",
-      "text": "БЖД\n\nИжойкин Ю.М.\n\n17:10 - 18:40\n\n504"
+      "status": "normal",
+      "subject": "БЖД",
+      "teacher": "Ижойкин Ю.М.",
+      "room": "504",
+      "start": "17:10",
+      "end": "18:40"
     },
     {
+      "id": "legacy-20261110-6-1",
       "date": "20261110",
-      "lesson": "6",
+      "pair": 6,
       "position": 1,
-      "classes": "dL dLC",
-      "text": "ОсФилос\n\nЕфимов В.С.\n\n17:10 - 18:40\n\n323"
+      "status": "cancelled",
+      "subject": "ОсФилос",
+      "teacher": "Ефимов В.С.",
+      "room": "323",
+      "start": "17:10",
+      "end": "18:40"
     },
     {
+      "id": "legacy-20261111-6-1",
       "date": "20261111",
-      "lesson": "6",
+      "pair": 6,
       "position": 1,
-      "classes": "dL ",
-      "text": "РЭАС\n\nШефер А.В.\n\n17:10 - 18:40\n\n312"
+      "status": "normal",
+      "subject": "РЭАС",
+      "teacher": "Шефер А.В.",
+      "room": "312",
+      "start": "17:10",
+      "end": "18:40"
     },
     {
+      "id": "legacy-20261112-6-1",
       "date": "20261112",
-      "lesson": "6",
+      "pair": 6,
       "position": 1,
-      "classes": "dL ",
-      "text": "ОсФилос\n\nЕфимов В.С.\n\n17:10 - 18:40\n\n323"
+      "status": "normal",
+      "subject": "ОсФилос",
+      "teacher": "Ефимов В.С.",
+      "room": "323",
+      "start": "17:10",
+      "end": "18:40"
     },
     {
+      "id": "legacy-20261113-6-1",
       "date": "20261113",
-      "lesson": "6",
+      "pair": 6,
       "position": 1,
-      "classes": "dL ",
-      "text": "ЭксКС\n\nАдринский И.Г.\n\n17:10 - 18:40\n\n118"
+      "status": "normal",
+      "subject": "ЭксКС",
+      "teacher": "Адринский И.Г.",
+      "room": "118",
+      "start": "17:10",
+      "end": "18:40"
     },
     {
+      "id": "legacy-20261113-6-2",
       "date": "20261113",
-      "lesson": "6",
+      "pair": 6,
       "position": 2,
-      "classes": "dL ",
-      "text": "ЭксКС\n\nЗинченко А.К.\n\n17:10 - 18:40\n\n118"
+      "status": "normal",
+      "subject": "ЭксКС",
+      "teacher": "Зинченко А.К.",
+      "room": "118",
+      "start": "17:10",
+      "end": "18:40"
     },
     {
+      "id": "legacy-20261114-6-1",
       "date": "20261114",
-      "lesson": "6",
+      "pair": 6,
       "position": 1,
-      "classes": "dL ",
-      "text": "ИнЯзПД\n\nПередрей А.Е.\n\n17:10 - 18:40\n\n204"
+      "status": "normal",
+      "subject": "ИнЯзПД",
+      "teacher": "Передрей А.Е.",
+      "room": "204",
+      "start": "17:10",
+      "end": "18:40"
     },
     {
+      "id": "legacy-20261114-6-2",
       "date": "20261114",
-      "lesson": "6",
+      "pair": 6,
       "position": 2,
-      "classes": "dL ",
-      "text": "ИнЯзПД\n\nАнтонова О.Н.\n\n17:10 - 18:40\n\n403"
+      "status": "normal",
+      "subject": "ИнЯзПД",
+      "teacher": "Антонова О.Н.",
+      "room": "403",
+      "start": "17:10",
+      "end": "18:40"
     }
   ]
 }
