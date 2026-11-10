@@ -14,7 +14,7 @@ if (!sw.includes("addEventListener") || !sw.includes("fetch")) {
   throw new Error("sw.js does not contain the expected service-worker handlers");
 }
 
-const scripts = [...html.matchAll(/<script(?:\\s[^>]*)?>([\\s\\S]*?)<\\/script>/gi)]
+const scripts = [...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)]
   .map((match) => match[1])
   .filter((source) => source.trim());
 
@@ -24,13 +24,13 @@ for (let i = 0; i < scripts.length; i++) {
   try {
     new Function(scripts[i]);
   } catch (error) {
-    throw new Error(`Inline script ${i + 1} has a syntax error: ${error.message}`);
+    throw new Error(\`Inline script \${i + 1} has a syntax error: \${error.message}\`);
   }
 }
 try {
   new Function(sw);
 } catch (error) {
-  throw new Error(`Service worker has a syntax error: ${error.message}`);
+  throw new Error(\`Service worker has a syntax error: \${error.message}\`);
 }
 
-console.log(`Campus validation passed: ${scripts.length} inline script(s), manifest and service worker.`);
+console.log(\`Campus validation passed: \${scripts.length} inline script(s), manifest and service worker.\`);
