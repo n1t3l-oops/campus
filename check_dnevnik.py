@@ -57,34 +57,31 @@ def make_week_url(base_url, day):
     return urlunparse(parsed._replace(query=urlencode(query, doseq=True)))
 
 
+async def get_week_start(page):
+    dates = await page.locator("table.scheduleWeekEditorParent td[id^='d']").evaluate_all(
+        """els => els.map(el => {
+            const m = (el.id || '').match(/^d(\\d{8})_\\d+$/);
+            return m ? m[1] : null;
+        }).filter(Boolean)"""
+    )
+    parsed = []
+    for value in dates:
+        try:
+            parsed.append(datetime.strptime(value, "%Y%m%d").date())
+        except ValueError:
+            pass
+    if not parsed:
+        raise RuntimeError("Не удалось определить даты недели в таблице Дневник.ру.")
+    return min(parsed)
+
+
 async def get_week_urls(page):
     current_url = page.url
-    current_day = date_from_url(current_url) or datetime.now().date()
-
-    links = await page.locator("a[href*='year='][href*='month='][href*='day=']").evaluate_all(
-        """els => els.map(a => ({
-            href: a.href,
-            text: (a.innerText || '').trim(),
-            title: a.title || '',
-            aria: a.getAttribute('aria-label') || ''
-        }))"""
-    )
-
-    candidates = {}
-    for item in links:
-        day = date_from_url(item["href"])
-        if not day:
-            continue
-        delta = (day - current_day).days
-        if 5 <= delta <= 9:
-            candidates["next"] = item["href"]
-        elif -9 <= delta <= -5:
-            candidates["previous"] = item["href"]
-
+    week_start = await get_week_start(page)
     return [
-        candidates.get("previous", make_week_url(current_url, current_day - timedelta(days=7))),
+        make_week_url(current_url, week_start - timedelta(days=7)),
         current_url,
-        candidates.get("next", make_week_url(current_url, current_day + timedelta(days=7))),
+        make_week_url(current_url, week_start + timedelta(days=7)),
     ]
 
 
