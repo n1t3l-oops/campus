@@ -15,7 +15,9 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .days{display:flex;gap:6px;margin-bottom:14px}
 .d{flex:1;background:var(--sf);border-radius:14px;padding:8px 0;text-align:center;font-size:12px;color:var(--t2);transition:.15s}
 .d b{display:block;font-size:17px;color:var(--tx)}.d.on{background:var(--ac);color:#fff}.d.on b{color:#fff}.d.td{outline:2px solid var(--ac);outline-offset:-2px}
-.nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.nav button{padding:6px 12px;border-radius:12px;background:var(--sf)}
+.nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.nav button{padding:6px 12px;border-radius:12px;background:var(--sf)}.nav .today{background:var(--ac);color:#fff}
+#syncMeta{color:var(--t2);font-size:12px;margin:-4px 0 12px;text-align:center}
+.change-note{font-size:12px;color:var(--or);margin-top:5px;line-height:1.35}
 .card{background:var(--sf);border-radius:18px;padding:14px 16px;margin-bottom:10px;display:flex;gap:14px;box-shadow:0 1px 3px rgba(0,0,0,.06);transition:transform .12s}
 .card:active{transform:scale(.985)}.card.now{outline:2px solid var(--ac)}
 .tm{min-width:52px;font-variant-numeric:tabular-nums;font-weight:600;font-size:15px}.tm small{display:block;color:var(--t2);font-weight:400}
@@ -36,7 +38,7 @@ pre{white-space:pre-wrap;font-size:12px;background:var(--sf);padding:10px;border
 </style></head><body><main>
 <div class="top"><div><h1 id="h"></h1><p class="sub" id="s"></p></div><div style="display:flex;gap:8px"><button class="refresh" id="gear" aria-label="Настройки">⚙</button><button class="refresh" id="refresh">↻ Обновить</button></div></div>
 <div class="days" id="days"></div>
-<div class="nav"><button id="pw">‹ Неделя</button><span id="wk" class="sub" style="margin:0"></span><button id="nw">Неделя ›</button></div>
+<div class="nav"><button id="pw">‹ Неделя</button><button id="today" class="today">Сегодня</button><button id="nw">Неделя ›</button></div><div id="syncMeta"></div>
 <div id="list"></div></main>
 <dialog id="dg"></dialog>
 
@@ -55,6 +57,15 @@ t24:[['8:00','9:30'],['9:40','11:10'],['11:40','13:00'],['14:20','15:40'],['15:5
 const DN=['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'],DS=['Пн','Вт','Ср','Чт','Пт','Сб'];
 const $=i=>document.getElementById(i),ld=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},sv=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
 let cfg=ld('cfg',{subgroup:'all'}),chg=[],cur=new Date();cur.setHours(0,0,0,0);
+const REFRESH_MS=5*60*1000;
+let lastFetchAt=Date.now(),nextRefreshAt=Date.now()+REFRESH_MS;
+function updateRefreshMeta(){
+ const left=Math.max(0,nextRefreshAt-Date.now());
+ const mm=String(Math.floor(left/60000)).padStart(2,'0');
+ const ss=String(Math.floor((left%60000)/1000)).padStart(2,'0');
+ const checked=new Date(lastFetchAt).toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+ $('syncMeta').textContent='Проверено '+checked+' · следующая проверка через '+mm+':'+ss;
+}
 const normalizeLessons=items=>items.map(x=>({...x,date:String(x.date).replace(/^(\d{4})(\d{2})(\d{2})$/,'$1-$2-$3')}));
 const SUBJECT_SHORT={
  'Электроника и схемотехника':'ЭлСхем',
@@ -90,7 +101,8 @@ function resolve(d){
     room:x.room||'',
     s:x.start||x.time_start||'',
     e:x.end||x.time_end||'',
-    st:status==='cancelled'?'cancel':status==='changed'?'changed':'normal'
+    st:status==='cancelled'?'cancel':status==='changed'?'changed':'normal',
+    previous:x.previous||null
    };
   }
   const lines=String(x.text||'').split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
@@ -130,6 +142,8 @@ async function loadSchedule(){
   }
   render();
   return false;
+ }finally{
+  lastFetchAt=Date.now();nextRefreshAt=lastFetchAt+REFRESH_MS;updateRefreshMeta();
  }
 }
 const mm=t=>{const[a,b]=t.split(':');return+a*60+ +b};
@@ -141,9 +155,18 @@ function render(){const d=cur,t=new Date();t.setHours(0,0,0,0);const L=resolve(d
  const hasDate=remoteLessons.some(x=>x.date===iso(d));
  $('list').innerHTML=L.length?L.map(l=>{const now=isT&&l.st!=='cancel'&&nowM>=mm(l.s)&&nowM<=mm(l.e);
   const bd={normal:'По расписанию',cancel:'Отменено',changed:'Изменено'}[l.st];
-  return`<div class="card ${l.st==='cancel'?'cancel':l.st==='changed'?'changed':'normal'}"><div class="tm">${l.s}<small>${l.e}</small></div><div><div class="nm">${l.subj}</div><div class="mt">${l.pair} пара${l.room?' · каб. '+l.room:''}${l.teacher?' · '+l.teacher:''}</div>${bd?`<span class="badge b-${l.st}">${bd}</span>`:''}${now?'<span class="badge b-now">Идёт сейчас</span>':''}</div></div>`}).join(''):`<div class="empty">${hasDate?(d.getDay()?'В этот день занятий нет.':'Воскресенье — выходной.'):'На эту дату нет данных из Дневника.'}<br>Проверьте расписание Дневник.ру позже.</div>`}
+  const p=l.previous,changes=[];
+  if(p){
+   if(p.subject!==undefined&&p.subject!==l.subj)changes.push('предмет: '+p.subject);
+   if(p.teacher!==undefined&&p.teacher!==l.teacher)changes.push('преподаватель: '+(p.teacher||'не указан'));
+   if(p.room!==undefined&&p.room!==l.room)changes.push('кабинет: '+(p.room||'не указан'));
+   if(p.pair!==undefined&&Number(p.pair)!==Number(l.pair))changes.push('пара: '+p.pair+' → '+l.pair);
+   if((p.start!==undefined&&p.start!==l.s)||(p.end!==undefined&&p.end!==l.e))changes.push('время: '+(p.start||'—')+'–'+(p.end||'—')+' → '+l.s+'–'+l.e);
+  }
+  const changeText=l.st==='changed'?(changes.length?'Изменилось: '+changes.join('; '):'Изменено в Дневнике.ру'): '';
+  return`<div class="card ${l.st==='cancel'?'cancel':l.st==='changed'?'changed':'normal'}"><div class="tm">${l.s}<small>${l.e}</small></div><div><div class="nm">${l.subj}</div><div class="mt">${l.pair} пара${l.room?' · каб. '+l.room:''}${l.teacher?' · '+l.teacher:''}</div>${bd?`<span class="badge b-${l.st}">${bd}</span>`:''}${now?'<span class="badge b-now">Идёт сейчас</span>':''}${changeText?`<div class="change-note">${changeText}</div>`:''}</div></div>`}).join(''):`<div class="empty">${hasDate?(d.getDay()?'В этот день занятий нет.':'Воскресенье — выходной.'):'На эту дату нет данных из Дневника.'}<br>Проверьте расписание Дневник.ру позже.</div>`}
 $('days').onclick=e=>{const b=e.target.closest('[data-d]');if(b){cur=new Date(b.dataset.d+'T00:00');render()}};
-$('pw').onclick=()=>{cur=addD(cur,-7);render()};$('nw').onclick=()=>{cur=addD(cur,7);render()};
+$('pw').onclick=()=>{cur=addD(cur,-7);render()};$('nw').onclick=()=>{cur=addD(cur,7);render()};$('today').onclick=()=>{cur=new Date();cur.setHours(0,0,0,0);render()};
 const dg=$('dg');
 $('gear').onclick=()=>{
  dg.innerHTML=`<h2 style="margin:0">Настройки</h2><p class="sub">Источник: Дневник.ру · группа БП314</p><label>Подгруппа</label><select id="sg"><option value="all">Обе подгруппы</option><option value="1">1 подгруппа</option><option value="2">2 подгруппа</option></select><button class="pri" id="ok">Сохранить</button>`;
@@ -152,6 +175,6 @@ $('gear').onclick=()=>{
  dg.showModal();
 };
 $('refresh').onclick=async()=>{const b=$('refresh');b.disabled=true;b.textContent='Обновляю…';const ok=await loadSchedule();b.disabled=false;b.textContent=ok?'↻ Обновить':'Повторить';};
-render();loadSchedule();setInterval(render,60000);setInterval(loadSchedule,5*60*1000);
+render();loadSchedule();setInterval(render,60000);setInterval(updateRefreshMeta,1000);setInterval(loadSchedule,REFRESH_MS);
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js');
 </script></body></html>
