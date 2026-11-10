@@ -54,7 +54,7 @@ t13:[['8:00','9:20'],['9:30','10:50'],['11:50','13:10'],['14:10','15:20'],['15:3
 t24:[['8:00','9:30'],['9:40','11:10'],['11:40','13:00'],['14:20','15:40'],['15:50','17:00'],['17:30','18:40']]};
 const DN=['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'],DS=['Пн','Вт','Ср','Чт','Пт','Сб'];
 const $=i=>document.getElementById(i),ld=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},sv=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
-let cfg=ld('cfg',{sub:2,group:'БП314',anchor:null}),chg=[],cur=new Date();cur.setHours(0,0,0,0);
+let cfg=ld('cfg',{anchor:null}),chg=[],cur=new Date();cur.setHours(0,0,0,0);
 const normalizeLessons=items=>items.map(x=>({...x,date:String(x.date).replace(/^(\d{4})(\d{2})(\d{2})$/,'$1-$2-$3')}));
 let scheduleData=ld('remoteSchedule',null),remoteLessons=normalizeLessons(scheduleData?.lessons||[]);
 const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
@@ -127,9 +127,8 @@ function render(){const d=cur,t=new Date();t.setHours(0,0,0,0);const L=resolve(d
 $('days').onclick=e=>{const b=e.target.closest('[data-d]');if(b){cur=new Date(b.dataset.d+'T00:00');render()}};
 $('pw').onclick=()=>{cur=addD(cur,-7);render()};$('nw').onclick=()=>{cur=addD(cur,7);render()};
 const dg=$('dg');
-$('gear').onclick=()=>{const t=new Date();dg.innerHTML=`<h2 style="margin:0">Настройки</h2><label>Группа</label><input id="g" value="${cfg.group}"><label>Подгруппа</label><select id="sg"><option ${cfg.sub==1?'selected':''}>1</option><option ${cfg.sub==2?'selected':''}>2</option></select><label>Сегодня идёт неделя №</label><select id="aw"><option>1</option><option>2</option></select><button class="pri" id="ok">Сохранить</button><button class="sec" id="rs" style="color:var(--rd)">Удалить все замены</button>`;
- $('aw').value=weekOf(t);$('ok').onclick=()=>{const g=$('g').value.trim().toUpperCase();if(!/^[А-ЯA-Z]{2}\d{3}$/.test(g))return alert('Группа вводится как БП314');cfg={group:g,sub:+$('sg').value,anchor:{mon:iso(mon(t)),w:+$('aw').value}};sv('cfg',cfg);dg.close();render()};
- $('rs').onclick=()=>{if(confirm('Удалить все сохранённые замены? Основное расписание останется.')){chg=[];sv('chg',chg);dg.close();render()}};dg.showModal()};
+$('gear').onclick=()=>{const t=new Date();dg.innerHTML=`<h2 style="margin:0">Настройки</h2><p class="sub">Источник: Дневник.ру · группа БП314</p><label>Сегодня идёт неделя №</label><select id="aw"><option>1</option><option>2</option></select><button class="pri" id="ok">Сохранить</button>`;
+ $('aw').value=weekOf(t);$('ok').onclick=()=>{cfg={anchor:{mon:iso(mon(t)),w:+$('aw').value}};sv('cfg',cfg);dg.close();render()};dg.showModal()};
 if(!cfg.anchor)$('gear').click();
 render();loadSchedule();setInterval(render,60000);setInterval(loadSchedule,5*60*1000);
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js');
