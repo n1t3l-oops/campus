@@ -6,7 +6,7 @@ import logging
 import re
 import subprocess
 import sys
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
