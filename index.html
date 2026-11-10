@@ -139,8 +139,9 @@ function resolve(d){
    l.s=l.s||times[0];l.e=l.e||times[1];
   }
  });
- const counts={};out.forEach(l=>counts[l.pair]=(counts[l.pair]||0)+1);
- out.forEach(l=>{l.subgroup=Number(l.subgroup)||(counts[l.pair]>1?l.position:0);l.subj=shortSubject(l.subj);l.teacher=shortTeacher(l.teacher)});
+ // Не выводим подгруппу из номера позиции: общие и неоднозначные пары
+ // должны оставаться видимыми в обоих фильтрах.
+ out.forEach(l=>{l.subgroup=Number(l.subgroup)||0;l.subj=shortSubject(l.subj);l.teacher=shortTeacher(l.teacher)});
  const selected=cfg.subgroup||'all';
  return out.filter(l=>selected==='all'||!l.subgroup||String(l.subgroup)===selected).sort((a,b)=>a.pair-b.pair||a.position-b.position);
 }
