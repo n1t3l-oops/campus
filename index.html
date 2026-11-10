@@ -157,8 +157,8 @@ function render(){const d=cur,t=new Date();t.setHours(0,0,0,0);const L=resolve(d
   const bd={normal:'По расписанию',cancel:'Отменено',changed:'Изменено'}[l.st];
   const p=l.previous,changes=[];
   if(p){
-   if(p.subject!==undefined&&p.subject!==l.subj)changes.push('предмет: '+p.subject);
-   if(p.teacher!==undefined&&p.teacher!==l.teacher)changes.push('преподаватель: '+(p.teacher||'не указан'));
+   if(p.subject!==undefined&&shortSubject(p.subject)!==l.subj)changes.push('предмет: '+shortSubject(p.subject));
+   if(p.teacher!==undefined&&shortTeacher(p.teacher)!==l.teacher)changes.push('преподаватель: '+(shortTeacher(p.teacher)||'не указан'));
    if(p.room!==undefined&&p.room!==l.room)changes.push('кабинет: '+(p.room||'не указан'));
    if(p.pair!==undefined&&Number(p.pair)!==Number(l.pair))changes.push('пара: '+p.pair+' → '+l.pair);
    if((p.start!==undefined&&p.start!==l.s)||(p.end!==undefined&&p.end!==l.e))changes.push('время: '+(p.start||'—')+'–'+(p.end||'—')+' → '+l.s+'–'+l.e);
