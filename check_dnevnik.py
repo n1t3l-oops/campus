@@ -76,7 +76,6 @@ async def get_week_start(page):
 
 
 async def get_week_urls(page):
-    current_url = page.url
     week_start = await get_week_start(page)
 
     links = await page.locator(
@@ -100,18 +99,23 @@ async def get_week_urls(page):
         (day, url) for day, url in dated_links.items()
         if 0 < (week_start - day).days <= 9
     ]
+    current = [
+        (day, url) for day, url in dated_links.items()
+        if week_start <= day <= week_start + timedelta(days=6)
+    ]
     following = [
         (day, url) for day, url in dated_links.items()
         if 0 < (day - week_start).days <= 9
     ]
 
-    if not previous or not following:
+    if not previous or not current or not following:
         raise RuntimeError(
-            "Не удалось найти ссылки на предыдущую и следующую недели "
-            "в навигации Дневник.ру."
+            "Не удалось найти ссылки на предыдущую, текущую и следующую "
+            "недели в навигации Дневник.ру."
         )
 
     previous_url = max(previous, key=lambda item: item[0])[1]
+    current_url = min(current, key=lambda item: abs((item[0] - week_start).days))[1]
     next_url = min(following, key=lambda item: item[0])[1]
     return [previous_url, current_url, next_url]
 
@@ -168,21 +172,20 @@ async def scrape():
 
             for index, url in enumerate(week_urls):
                 expected_start = current_week_start + timedelta(days=(index - 1) * 7)
-                if index:
-                    await page.goto(url, wait_until="domcontentloaded", timeout=90000)
-                    await page.locator("table.scheduleWeekEditorParent").wait_for(timeout=90000)
-                    expected_key = expected_start.strftime("%Y%m%d")
-                    await page.wait_for_function(
-                        """expected => {
-                            const ids = [...document.querySelectorAll(
-                                'table.scheduleWeekEditorParent td[id^="d"]'
-                            )].map(td => (td.id || '').match(/^d(\\d{8})_\\d+$/))
-                              .filter(Boolean).map(match => match[1]);
-                            return ids.length > 0 && ids.includes(expected);
-                        }""",
-                        arg=expected_key,
-                        timeout=30000,
-                    )
+                await page.goto(url, wait_until="domcontentloaded", timeout=90000)
+                await page.locator("table.scheduleWeekEditorParent").wait_for(timeout=90000)
+                expected_key = expected_start.strftime("%Y%m%d")
+                await page.wait_for_function(
+                    """expected => {
+                        const ids = [...document.querySelectorAll(
+                            'table.scheduleWeekEditorParent td[id^="d"]'
+                        )].map(td => (td.id || '').match(/^d(\\d{8})_\\d+$/))
+                          .filter(Boolean).map(match => match[1]);
+                        return ids.length > 0 && ids.includes(expected);
+                    }""",
+                    arg=expected_key,
+                    timeout=30000,
+                )
 
                 actual_start = await get_week_start(page)
                 if actual_start != expected_start:
