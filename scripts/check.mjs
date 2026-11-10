@@ -24,13 +24,13 @@ for (let i = 0; i < scripts.length; i++) {
   try {
     new Function(scripts[i]);
   } catch (error) {
-    throw new Error(\`Inline script \${i + 1} has a syntax error: \${error.message}\`);
+    throw new Error(`Inline script ${i + 1} has a syntax error: ${error.message}`);
   }
 }
 try {
   new Function(sw);
 } catch (error) {
-  throw new Error(\`Service worker has a syntax error: \${error.message}\`);
+  throw new Error(`Service worker has a syntax error: ${error.message}`);
 }
 
-console.log(\`Campus validation passed: \${scripts.length} inline script(s), manifest and service worker.\`);
+console.log(`Campus validation passed: ${scripts.length} inline script(s), manifest and service worker.`);
