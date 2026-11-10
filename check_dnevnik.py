@@ -122,12 +122,23 @@ async def extract_page(page):
             const siblings = td ? [...td.querySelectorAll(':scope > .dL')] : [];
             const subjectText = subject?.title || subject?.innerText?.trim() || 'Занятие';
             const teacherText = (teacher?.title || teacher?.innerText || '').replace(/^Учитель:\\s*/, '').trim();
-            let subgroup = siblings.length > 1 ? siblings.indexOf(el) + 1 : 0;
-            // В английском преподаватели в DOM идут в обратном порядке относительно
-            // принятого распределения подгрупп: Антонова — 1, Передрей — 2.
+            // Подгруппу назначаем только при подтверждённом разделении.
+            // Одна запись или неоднозначный набор записей остаются общими (0).
+            let subgroup = 0;
             if (subjectText.includes('Иностранный язык в профессиональной деятельности')) {
                 if (teacherText.includes('Антонова')) subgroup = 1;
                 else if (teacherText.includes('Передрей')) subgroup = 2;
+            } else if (siblings.length === 2) {
+                const sibling = siblings.find(item => item !== el);
+                const siblingSubject = sibling?.querySelector('a.aL');
+                const siblingTeacher = sibling?.querySelector('[data-test-id="teacher"]');
+                const siblingSubjectText = siblingSubject?.title || siblingSubject?.innerText?.trim() || '';
+                const siblingTeacherText = (siblingTeacher?.title || siblingTeacher?.innerText || '')
+                    .replace(/^Учитель:\\s*/, '').trim();
+                if (siblingSubjectText === subjectText && siblingTeacherText &&
+                    teacherText && siblingTeacherText !== teacherText) {
+                    subgroup = siblings.indexOf(el) + 1;
+                }
             }
             return {
                 id: (el.id || '').replace(/^l/, ''),
