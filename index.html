@@ -20,9 +20,9 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .card:active{transform:scale(.985)}.card.now{outline:2px solid var(--ac)}
 .tm{min-width:52px;font-variant-numeric:tabular-nums;font-weight:600;font-size:15px}.tm small{display:block;color:var(--t2);font-weight:400}
 .nm{font-weight:600;font-size:17px}.mt{color:var(--t2);font-size:14px}
-.card.cancel{border-left:4px solid var(--rd)}.card.cancel .nm{text-decoration:line-through;color:var(--t2)}.card.changed{border-left:4px solid var(--gr)}
+.card.normal{border-left:4px solid var(--ac)}.card.cancel{border-left:4px solid var(--rd)}.card.cancel .nm{text-decoration:line-through;color:var(--t2)}.card.changed{border-left:4px solid var(--gr)}
 .badge{display:inline-block;font-size:12px;padding:2px 8px;border-radius:8px;margin-top:4px;color:#fff}
-.b-cancel{background:var(--rd)}.b-changed{background:var(--gr)}.b-now{background:var(--ac)}
+.b-normal{background:var(--ac)}.b-cancel{background:var(--rd)}.b-changed{background:var(--gr)}.b-now{background:var(--ac)}
 .empty{text-align:center;color:var(--t2);padding:40px 10px}
 .fab{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom));background:var(--ac);color:#fff;padding:14px 22px;border-radius:26px;font-weight:600;box-shadow:0 6px 18px rgba(0,122,255,.35)}
 dialog{border:0;border-radius:20px;background:var(--bg);color:var(--tx);width:min(520px,94vw);max-height:90vh;padding:18px}
@@ -77,7 +77,7 @@ function resolve(d){
     room:x.room||'',
     s:x.start||x.time_start||'',
     e:x.end||x.time_end||'',
-    st:status==='cancelled'?'cancel':status==='changed'?'changed':null
+    st:status==='cancelled'?'cancel':status==='changed'?'changed':'normal'
    };
   }
   const lines=String(x.text||'').split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
@@ -122,8 +122,8 @@ function render(){const d=cur,t=new Date();t.setHours(0,0,0,0);const L=resolve(d
  const nowM=new Date().getHours()*60+new Date().getMinutes(),isT=iso(d)===iso(t);
  const hasDate=remoteLessons.some(x=>x.date===iso(d));
  $('list').innerHTML=L.length?L.map(l=>{const now=isT&&l.st!=='cancel'&&nowM>=mm(l.s)&&nowM<=mm(l.e);
-  const bd={cancel:'Отменено',changed:'Изменено'}[l.st];
-  return`<div class="card ${l.st==='cancel'?'cancel':l.st==='changed'?'changed':''}"><div class="tm">${l.s}<small>${l.e}</small></div><div><div class="nm">${l.subj}</div><div class="mt">${l.pair} пара${l.room?' · каб. '+l.room:''}${l.teacher?' · '+l.teacher:''}</div>${bd?`<span class="badge b-${l.st}">${bd}</span>`:''}${now?'<span class="badge b-now">Идёт сейчас</span>':''}</div></div>`}).join(''):`<div class="empty">${hasDate?(d.getDay()?'В этот день занятий нет.':'Воскресенье — выходной.'):'На эту дату нет данных из Дневника.'}<br>Проверьте расписание Дневник.ру позже.</div>`}
+  const bd={normal:'По расписанию',cancel:'Отменено',changed:'Изменено'}[l.st];
+  return`<div class="card ${l.st==='cancel'?'cancel':l.st==='changed'?'changed':'normal'}"><div class="tm">${l.s}<small>${l.e}</small></div><div><div class="nm">${l.subj}</div><div class="mt">${l.pair} пара${l.room?' · каб. '+l.room:''}${l.teacher?' · '+l.teacher:''}</div>${bd?`<span class="badge b-${l.st}">${bd}</span>`:''}${now?'<span class="badge b-now">Идёт сейчас</span>':''}</div></div>`}).join(''):`<div class="empty">${hasDate?(d.getDay()?'В этот день занятий нет.':'Воскресенье — выходной.'):'На эту дату нет данных из Дневника.'}<br>Проверьте расписание Дневник.ру позже.</div>`}
 $('days').onclick=e=>{const b=e.target.closest('[data-d]');if(b){cur=new Date(b.dataset.d+'T00:00');render()}};
 $('pw').onclick=()=>{cur=addD(cur,-7);render()};$('nw').onclick=()=>{cur=addD(cur,7);render()};
 const dg=$('dg');
