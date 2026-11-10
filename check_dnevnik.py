@@ -167,31 +167,38 @@ async def scrape():
             await page.locator("table.scheduleWeekEditorParent").wait_for(timeout=90000)
 
             week_urls = await get_week_urls(page)
-            current_week_start = await get_week_start(page)
+            current_first_lesson = await get_week_start(page)
+            current_week_monday = current_first_lesson - timedelta(days=current_first_lesson.weekday())
             all_lessons = {}
 
             for index, url in enumerate(week_urls):
-                expected_start = current_week_start + timedelta(days=(index - 1) * 7)
+                expected_monday = current_week_monday + timedelta(days=(index - 1) * 7)
                 await page.goto(url, wait_until="domcontentloaded", timeout=90000)
                 await page.locator("table.scheduleWeekEditorParent").wait_for(timeout=90000)
-                expected_key = expected_start.strftime("%Y%m%d")
-                await page.locator(
-                    f"table.scheduleWeekEditorParent td[id^='d{expected_key}_']"
-                ).first.wait_for(state="attached", timeout=30000)
 
-                actual_start = await get_week_start(page)
-                if actual_start != expected_start:
-                    table_dates = await page.locator(
-                        "table.scheduleWeekEditorParent td[id^='d']"
-                    ).evaluate_all(
-                        """els => [...new Set(els.map(el => {
-                            const m = (el.id || '').match(/^d(\\d{8})_\\d+$/);
-                            return m ? m[1] : null;
-                        }).filter(Boolean))].sort()"""
-                    )
+                # В некоторые недели в понедельник нет занятий. Поэтому сверяем
+                # календарную неделю, а не требуем наличие ячейки именно за понедельник.
+                actual_first_lesson = await get_week_start(page)
+                actual_monday = actual_first_lesson - timedelta(days=actual_first_lesson.weekday())
+                table_dates = await page.locator(
+                    "table.scheduleWeekEditorParent td[id^='d']"
+                ).evaluate_all(
+                    """els => [...new Set(els.map(el => {
+                        const m = (el.id || '').match(/^d(\\d{8})_\\d+$/);
+                        return m ? m[1] : null;
+                    }).filter(Boolean))].sort()"""
+                )
+
+                logging.info(
+                    "Проверка недели %s: URL=%s; первая дата=%s; понедельник=%s; даты=%s",
+                    index + 1, page.url, actual_first_lesson, actual_monday, table_dates,
+                )
+
+                if actual_monday != expected_monday:
                     raise RuntimeError(
-                        f"Дневник.ру открыл не ту неделю: ожидалась {expected_start}, "
-                        f"получена {actual_start}. URL после перехода: {page.url}. "
+                        f"Дневник.ру открыл не ту неделю: ожидалась неделя с "
+                        f"{expected_monday}, получена неделя с {actual_monday}. "
+                        f"Запрошенный URL: {url}. URL после перехода: {page.url}. "
                         f"Даты в таблице: {table_dates}. Расписание не опубликовано."
                     )
                 lessons = await extract_page(page)
