@@ -1,5 +1,6 @@
 import asyncio
 import base64
+import ctypes
 import json
 import logging
 import re
@@ -15,6 +16,7 @@ BASE_DIR = Path(__file__).resolve().parent
 PROFILE = BASE_DIR / "dnevnik_profile"
 DATA_FILE = BASE_DIR / "schedule.json"
 LOG_FILE = BASE_DIR / "monitor.log"
+ERROR_STATE_FILE = BASE_DIR / "last_error.txt"
 
 BASE_URL = (
     "https://schools.dnevnik.ru/v2/r/omsk/schedules/view"
@@ -240,12 +242,27 @@ def shutil_which(command):
 async def main():
     await scrape()
     publish_to_github()
+    ERROR_STATE_FILE.unlink(missing_ok=True)
 
 
 if __name__ == "__main__":
     try:
         asyncio.run(main())
-    except Exception:
+    except Exception as exc:
         logging.exception("Ошибка обновления расписания")
-        print("Ошибка. Подробности в monitor.log")
+        message = f"{type(exc).__name__}: {exc}"
+        try:
+            previous = ERROR_STATE_FILE.read_text(encoding="utf-8") if ERROR_STATE_FILE.exists() else ""
+            ERROR_STATE_FILE.write_text(message, encoding="utf-8")
+            if previous != message:
+                ctypes.windll.user32.MessageBoxW(
+                    0,
+                    "Не удалось обновить расписание Campus.\n\n"
+                    + message
+                    + "\n\nПодробности: monitor.log",
+                    "Campus — ошибка синхронизации",
+                    0x10,
+                )
+        except Exception:
+            logging.exception("Не удалось показать уведомление об ошибке")
         sys.exit(1)
