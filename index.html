@@ -55,30 +55,82 @@ t24:[['8:00','9:30'],['9:40','11:10'],['11:40','13:00'],['14:20','15:40'],['15:5
 const DN=['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'],DS=['Пн','Вт','Ср','Чт','Пт','Сб'];
 const $=i=>document.getElementById(i),ld=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},sv=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
 let cfg=ld('cfg',{sub:2,group:'БП314',anchor:null}),chg=ld('chg',[]),cur=new Date();cur.setHours(0,0,0,0);
+let scheduleData=ld('remoteSchedule',null),remoteLessons=scheduleData?.lessons||[];
 const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 const mon=d=>{const x=new Date(d);x.setDate(x.getDate()-((x.getDay()+6)%7));x.setHours(0,0,0,0);return x};
 const addD=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x};
 function weekOf(d){if(!cfg.anchor)return 1;const a=cfg.anchor,n=Math.round((mon(d)-mon(new Date(a.mon)))/6048e5);return(((a.w-1+n)%2)+2)%2+1}
 function bells(d){if(d.getDay()!==4)return BELL.n;const k=Math.ceil(d.getDate()/7);return k===1||k===3?BELL.t13:k===2||k===4?BELL.t24:BELL.n}
 const tag=s=>(s||'').match(/([12])\s*пг/i)?.[1]|0,clean=s=>(s||'').replace(/\+?\s*[12]\s*пг/i,'').replace(/\+$/,'').trim();
-function resolve(d){const dow=d.getDay();if(!dow)return[];const rows=BASE[weekOf(d)][dow],bl=bells(d),out=[];
- rows.forEach((r,i)=>{const it=r.slice(1).find(x=>x[0]===0||x[0]===cfg.sub);if(it)out.push({pair:i+4,subj:clean(r[0]),teacher:it[1],room:it[2],st:null})});
- chg.filter(c=>c.date===iso(d)).forEach(c=>{let l=out.find(x=>x.pair===c.pair);
-  if(c.type==='cancel'){if(l){l.st='cancel';l.cid=c.id;l.reason=c.reason}return}
+function resolve(d){
+ const date=iso(d);
+ const out=remoteLessons.filter(x=>x.date===date).map(x=>{
+  const lines=String(x.text||'').split(/\\r?\\n/).map(s=>s.trim()).filter(Boolean);
+  const ti=lines.findIndex(s=>/\\d{1,2}:\\d{2}\\s*-\\s*\\d{1,2}:\\d{2}/.test(s));
+  const time=ti>=0?lines[ti].match(/(\\d{1,2}:\\d{2})\\s*-\\s*(\\d{1,2}:\\d{2})/):null;
+  return {
+   pair:Number(x.lesson),
+   position:Number(x.position)||1,
+   subj:lines[0]||'Занятие',
+   teacher:ti>1?lines[1]:'',
+   room:ti>=0?(lines.slice(ti+1).find(s=>/^[0-9]{2,3}[а-яa-z]?\\+?$/i.test(s))||''):'',
+   s:time?time[1]:'',
+   e:time?time[2]:'',
+   st:null
+  };
+ }).filter(x=>Number.isFinite(x.pair)&&x.pair>0);
+
+ chg.filter(c=>c.date===date).forEach(c=>{
+  let l=out.find(x=>x.pair===c.pair);
+  if(c.type==='cancel'){
+   if(l){l.st='cancel';l.cid=c.id;l.reason=c.reason}
+   return;
+  }
   const mine=!c.tag||c.tag===cfg.sub;
   if(!mine){if(l){l.st='cancel';l.cid=c.id}return}
-  const n={pair:c.pair,subj:clean(c.subj),teacher:c.teacher,room:c.room,st:c.type,cid:c.id,old:l?`${l.subj}, ${l.room||'—'}`:'',reason:c.reason};
-  if(l)Object.assign(l,n);else out.push(n)});
- out.sort((a,b)=>a.pair-b.pair);out.forEach(l=>{[l.s,l.e]=bl[l.pair-1]});return out}
+  const n={pair:c.pair,position:99,subj:clean(c.subj),teacher:c.teacher,room:c.room,st:c.type,cid:c.id,old:l?l.subj+', '+(l.room||'—'):'',reason:c.reason};
+  if(l)Object.assign(l,n);else out.push(n);
+ });
+
+ out.sort((a,b)=>a.pair-b.pair||a.position-b.position);
+ const bl=bells(d);
+ out.forEach(l=>{
+  if(!l.s||!l.e){
+   const times=bl[l.pair-1]||['',''];
+   l.s=l.s||times[0];l.e=l.e||times[1];
+  }
+ });
+ return out;
+}
+
+async function loadSchedule(){
+ try{
+  const response=await fetch('./schedule.json',{cache:'no-store'});
+  if(!response.ok)throw new Error('HTTP '+response.status);
+  const data=await response.json();
+  if(!Array.isArray(data.lessons))throw new Error('Некорректный schedule.json');
+  scheduleData=data;remoteLessons=data.lessons;
+  sv('remoteSchedule',data);
+  render();
+ }catch(error){
+  console.warn('Не удалось обновить расписание:',error);
+  if(!scheduleData){
+   scheduleData=ld('remoteSchedule',null);
+   remoteLessons=scheduleData?.lessons||[];
+  }
+  render();
+ }
+}
 const mm=t=>{const[a,b]=t.split(':');return+a*60+ +b};
 function render(){const d=cur,t=new Date();t.setHours(0,0,0,0);const L=resolve(d),w=weekOf(d);
  $('h').textContent=DN[d.getDay()];$('s').textContent=d.toLocaleDateString('ru',{day:'numeric',month:'long'})+(d.getDay()===4?' · '+(bells(d)===BELL.t13?'классный час':bells(d)===BELL.t24?'метод. час':''):'');
- $('wk').textContent='Неделя '+w+(cfg.anchor?'':' (задайте в ⚙)');
+ $('wk').textContent='Дневник'+(scheduleData?.updated_at?' · '+new Date(scheduleData.updated_at).toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'}):'');
  const m=mon(d);$('days').innerHTML=DS.map((n,i)=>{const x=addD(m,i);return`<button class="d ${iso(x)===iso(d)?'on':''} ${iso(x)===iso(t)?'td':''}" data-d="${iso(x)}">${n}<b>${x.getDate()}</b></button>`}).join('');
  const nowM=new Date().getHours()*60+new Date().getMinutes(),isT=iso(d)===iso(t);
+ const hasDate=remoteLessons.some(x=>x.date===iso(d));
  $('list').innerHTML=L.length?L.map(l=>{const now=isT&&l.st!=='cancel'&&nowM>=mm(l.s)&&nowM<=mm(l.e);
   const bd={cancel:'Отменено',replace:'Заменено',room:'Другой кабинет',add:'Добавлено'}[l.st];
-  return`<div class="card ${l.st==='cancel'?'cancel':''} ${now?'now':''}" data-p="${l.pair}"><div class="tm">${l.s}<small>${l.e}</small></div><div><div class="nm">${l.subj}</div><div class="mt">${l.pair} пара${l.room?' · каб. '+l.room:''}${l.teacher?' · '+l.teacher:''}</div>${l.old?`<div class="mt">Было: ${l.old}</div>`:''}${l.reason?`<div class="mt">Причина: ${l.reason}</div>`:''}${bd?`<span class="badge b-${l.st}">${bd}</span>`:''}${now?'<span class="badge b-now">Идёт сейчас</span>':''}</div></div>`}).join(''):`<div class="empty">${d.getDay()?'В этот день занятий нет.':'Воскресенье — выходной.'}<br>Замены можно загрузить кнопкой ниже.</div>`}
+  return`<div class="card ${l.st==='cancel'?'cancel':''} ${now?'now':''}" data-p="${l.pair}"><div class="tm">${l.s}<small>${l.e}</small></div><div><div class="nm">${l.subj}</div><div class="mt">${l.pair} пара${l.room?' · каб. '+l.room:''}${l.teacher?' · '+l.teacher:''}</div>${l.old?`<div class="mt">Было: ${l.old}</div>`:''}${l.reason?`<div class="mt">Причина: ${l.reason}</div>`:''}${bd?`<span class="badge b-${l.st}">${bd}</span>`:''}${now?'<span class="badge b-now">Идёт сейчас</span>':''}</div></div>`}).join(''):`<div class="empty">${hasDate?(d.getDay()?'В этот день занятий нет.':'Воскресенье — выходной.'):'На эту дату нет данных из Дневника.'}<br>Замены можно загрузить кнопкой ниже.</div>`}
 $('days').onclick=e=>{const b=e.target.closest('[data-d]');if(b){cur=new Date(b.dataset.d+'T00:00');render()}};
 $('pw').onclick=()=>{cur=addD(cur,-7);render()};$('nw').onclick=()=>{cur=addD(cur,7);render()};
 $('list').onclick=e=>{const c=e.target.closest('.card');if(!c)return;const p=+c.dataset.p,l=resolve(cur).find(x=>x.pair===p);
@@ -127,6 +179,6 @@ function showPrev({items,raw}){const lbl={cancel:'Отмена',replace:'Зам�
    chg.push({id:Date.now()+ +c.dataset.i,date,pair:it.pair,type:it.type,reason:it.reason,...(it.to?{subj:it.to.subj,teacher:it.to.teacher,room:it.to.room,tag:tag(it.to.subj)}:{})})});
   sv('chg',chg);dg.close();cur=new Date(date+'T00:00');render()}}
 if(!cfg.anchor)$('gear').click();
-render();setInterval(render,60000);
+render();loadSchedule();setInterval(render,60000);setInterval(loadSchedule,5*60*1000);
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js');
 </script></body></html>
