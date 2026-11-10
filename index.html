@@ -96,6 +96,7 @@ function resolve(d){
     id:x.id||x.lesson_id||date+'-'+x.pair+'-'+x.position,
     pair:Number(x.pair)||1,
     position:Number(x.position)||1,
+    subgroup:Number(x.subgroup)||0,
     subj:x.subject||x.subj,
     teacher:x.teacher||'',
     room:x.room||'',
