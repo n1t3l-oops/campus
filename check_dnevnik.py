@@ -82,43 +82,28 @@ async def get_week_urls(page):
         "a[href*='period='][href*='year='][href*='month='][href*='day=']"
     ).evaluate_all("els => els.map(a => a.href)")
 
-    dated_links = {}
+    # Берём ссылку текущей недели из навигации. Ссылки на соседние
+    # недели иногда не имеют href, поэтому вычисляем их сами, сохраняя
+    # все параметры Дневник.ру, включая period.
+    current_candidates = []
     for url in links:
-        query = parse_qs(urlparse(url).query)
-        try:
-            day = date(
-                int(query["year"][0]),
-                int(query["month"][0]),
-                int(query["day"][0]),
-            )
-        except (KeyError, ValueError, TypeError):
-            continue
-        dated_links[day] = url
+        day = date_from_url(url)
+        if day is not None and week_start <= day <= week_start + timedelta(days=6):
+            current_candidates.append((day, url))
 
-    previous = [
-        (day, url) for day, url in dated_links.items()
-        if 0 < (week_start - day).days <= 9
-    ]
-    current = [
-        (day, url) for day, url in dated_links.items()
-        if week_start <= day <= week_start + timedelta(days=6)
-    ]
-    following = [
-        (day, url) for day, url in dated_links.items()
-        if 0 < (day - week_start).days <= 9
-    ]
-
-    if not previous or not current or not following:
+    if not current_candidates:
         raise RuntimeError(
-            "Не удалось найти ссылки на предыдущую, текущую и следующую "
-            "недели в навигации Дневник.ру."
+            "Не удалось найти ссылку текущей недели в навигации Дневник.ру."
         )
 
-    previous_url = max(previous, key=lambda item: item[0])[1]
-    current_url = min(current, key=lambda item: abs((item[0] - week_start).days))[1]
-    next_url = min(following, key=lambda item: item[0])[1]
-    return [previous_url, current_url, next_url]
+    current_day, current_url = min(
+        current_candidates,
+        key=lambda item: abs((item[0] - week_start).days),
+    )
+    previous_url = make_week_url(current_url, current_day - timedelta(days=7))
+    next_url = make_week_url(current_url, current_day + timedelta(days=7))
 
+    return [previous_url, current_url, next_url]
 
 async def extract_page(page):
     return await page.locator("table.scheduleWeekEditorParent div.dL").evaluate_all(
