@@ -45,6 +45,26 @@ pre{white-space:pre-wrap;font-size:12px;background:var(--sf);padding:10px;border
 
 
 <script>
+(function(){
+ function show(message){
+  let box=document.getElementById('campus-error');
+  if(!box){
+   box=document.createElement('div');box.id='campus-error';
+   box.style.cssText='position:fixed;z-index:99999;left:10px;right:10px;bottom:10px;padding:14px;background:#8b1d1d;color:white;border-radius:12px;font:14px/1.4 system-ui;white-space:pre-wrap;max-height:40vh;overflow:auto';
+   document.body.appendChild(box);
+  }
+  box.textContent='Ошибка Campus: '+message;
+ }
+ window.addEventListener('error',function(e){show((e.message||'JavaScript error')+' · '+(e.filename||'')+':'+(e.lineno||''));});
+ window.addEventListener('unhandledrejection',function(e){show('Promise: '+String(e.reason&&e.reason.stack||e.reason));});
+ window.addEventListener('DOMContentLoaded',function(){
+  if('serviceWorker' in navigator){
+   navigator.serviceWorker.getRegistration().then(function(r){if(r)r.update().catch(function(){});});
+  }
+ });
+})();
+</script>
+<script>
 const Ад='Адринский И.Г.',Зи='Зинченко А.К.',Бе='Березовский Д.В.',Иж='Ижойкин Ю.М.',Ше='Шефер А.В.',По='Подшивалова Д.А.',Еф='Ефимов В.С.',Ур='Урванцев А.Е.',Ан='Антонова О.Н.',Пе='Передрей А.Е.';
 const A=(s,t,r)=>[s,[0,t,r]],G=(s,a,ra,b,rb)=>[s,[1,a,ra],[2,b,rb]];
 const EK=()=>G('ЭксКС+',Ад,'118+',Зи,'118+'),RE=()=>G('РЭАС+',Ше,'312+',По,'312+'),IN=()=>G('ИнЯзПД',Ан,'403',Пе,'204');
